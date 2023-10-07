@@ -1,0 +1,68 @@
+#@title Period vs. Angle (SAA & Non-SAA)
+import math
+import matplotlib.pyplot as plt
+
+# Constants
+DT = 0.01
+T_MAX = 20.0
+STEPS = int(T_MAX/DT)
+g = 9.81
+L = 1.0 
+
+# the period of the pendulum
+def calc_period(theta0):
+    # Setup initial conditions
+    t = [0]
+    theta = [theta0]
+    omega = [0]
+    
+    # Loop using Verlet's method
+    for i in range(1, STEPS+1):
+        t.append(i*DT)
+        theta.append(2*theta[i-1] - theta[i-2] - (g/l)*(math.sin(theta[i-1]))*DT**2)
+        omega.append((theta[i]-theta[i-1])/DT)
+    
+    # Calculate the period
+    t_crossings = []
+    for i in range(1, len(theta)):
+        if (theta[i] > 0 and theta[i-1] < 0) or (theta[i] < 0 and theta[i-1] > 0):
+            t_crossings.append((t[i-1] - (theta[i-1]/(theta[i]-theta[i-1]))*DT))
+    T = (t_crossings[-1] - t_crossings[-2]) * 2 # period is twice the time between the last two zero 
+    return T
+
+
+# list of initial angles and their corresponding periods
+theta0_list = [i * 0.1 for i in range(1, 31)]
+period_list = []
+for theta0 in theta0_list:
+    period = calc_period(theta0)
+    period_list.append(period)
+
+
+# function to calculate period using small angle approximation
+def period(theta):
+    period = 2 * math.pi * math.sqrt(L / g)
+    return period
+
+# list of initial angles to test
+angles = [i * 0.1 for i in range(0, 31)]
+
+
+# periods for each angle and store in list
+periods = []
+for angle in angles:
+    periods.append(period(angle))
+
+
+# period vs initial angle graphs
+plt.plot(theta0_list, period_list)
+plt.title("Period vs. Angle (Non-SAA)")
+plt.xlabel('Initial Angle (rad)')
+plt.ylabel('Period (s)')
+plt.show()
+
+plt.plot(angles, periods)
+plt.title("Period vs. Angle (SAA)")
+plt.xlabel("Initial Angle (rad)")
+plt.ylabel("Period (s)")
+plt.show()
