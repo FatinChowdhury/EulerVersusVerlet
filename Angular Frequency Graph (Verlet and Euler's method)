@@ -1,0 +1,52 @@
+#@title Angular Frequency Graph (Verlet and Euler's method)
+import matplotlib.pyplot as plt
+
+# Constants
+DT = 0.01
+t_max = 10.0
+NSTEPS = int(t_max/DT)
+g = 9.81
+l = 1.0
+
+# Initial conditions
+theta0 = 0.001
+omega0 = 0
+alpha0 = -(g/l)*theta0
+
+# Setting first elements as initial conditions.
+t = [0]
+alpha = [alpha0]
+omega = [omega0]
+theta = [theta0]
+
+# Implementing Euler's method using a for loop
+for i in range(NSTEPS):
+  t.append(t[i]+DT)
+  theta.append(theta[i]+omega[i]*DT)
+  omega.append(omega[i]+alpha[i]*DT)
+  alpha.append(-(g/l)*theta[i])
+
+# Plot t vs theta using Euler's method
+plt.plot(t,theta,label="Euler")
+plt.legend()
+
+# Reset values to initial condition for Verlet method
+t = [0]
+theta = [theta0]
+omega = [omega0]
+alpha = [alpha0]
+
+# Implementing Verlet's method using a for loop
+for i in range(NSTEPS):
+  t.append(t[i]+DT)
+  theta.append(theta[i] + omega[i]*DT + 0.5*alpha[i]*DT**2)
+  alpha.append(-(g/l)*theta[i+1])
+  omega.append(omega[i]+0.5*(alpha[i]+alpha[i+1])*DT)
+
+# Plotting t vs. theta using Verlet method
+plt.plot(t, theta, label = 'Verlet')
+plt.title("Angular Frequency Graph")
+plt.xlabel('Time (s)')
+plt.ylabel('Angular Displacement (rad)')
+plt.legend()
+plt.show()
