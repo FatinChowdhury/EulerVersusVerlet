@@ -1,0 +1,47 @@
+#@title Comparison of SAA to Full ODE (Angular Frequency vs. Amplitude)
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+L = 1.0
+g = 9.81
+NSTEPS = 1000 
+DT = 0.01
+
+# Defining function for differential equation with SAA (Verlet's method)
+def pendulum_small_angle_verlet(theta):
+    omega = 0.0
+    theta_old = theta
+    theta_new = theta + omega * DT + (-g/L) * theta * DT ** 2
+    for i in range(1, NSTEPS):
+        omega = omega + (-g/L) * (theta_old + theta_new) / 2 * DT
+        theta_old, theta_new = theta_new, 2 * theta_new - theta_old + (-g/L) * theta_new * DT ** 2
+    return omega
+
+# Defining function for differential equation without SAA (Verlet's method)
+def pendulum_large_angle_verlet(theta):
+    omega = 0.0
+    theta_old = theta
+    theta_new = theta + omega * DT + (-g/L) * np.sin(theta) * DT ** 2
+    for i in range(1, NSTEPS):
+        omega = omega + (-g/L) * np.sin(theta_new) * DT
+        theta_old, theta_new = theta_new, 2 * theta_new - theta_old + (-g/L) * np.sin(theta_new) * DT ** 2
+    return omega
+
+# Plot the results
+amplitude = np.linspace(0, np.pi/2, num=100) # W3School and in-class challenges for source
+omega_small_angle_verlet = []
+omega_large_angle_verlet = []
+
+
+for theta in amplitude:
+    omega_small_angle_verlet.append(pendulum_small_angle_verlet(theta))
+    omega_large_angle_verlet.append(pendulum_large_angle_verlet(theta))
+
+plt.plot(amplitude, omega_small_angle_verlet, label='Small angle approximation')
+plt.plot(amplitude, omega_large_angle_verlet, label='Without small angle approximation')
+plt.legend()
+plt.title('Angular Frequency vs Amplitude')
+plt.xlabel('Amplitude (radians)')
+plt.ylabel('Angular Frequency (radians/second)')
+plt.show()
